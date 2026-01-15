@@ -1,234 +1,255 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Keuangan Keluarga</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keuangan Keluarga</title>
 
-<link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon192.png">
-<meta name="theme-color" content="#0f172a">
-<meta name="apple-mobile-web-app-capable" content="yes">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="icon192.png">
 
-<style>
-:root{
-  --bg:#0f172a;
-  --card:#1e293b;
-  --input:#020617;
-  --text:#e5e7eb;
-  --muted:#94a3b8;
-  --green:#22c55e;
-  --red:#ef4444;
-}
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --danger: #f87171;
+      --success: #4ade80;
+    }
 
-*{box-sizing:border-box}
+    body.light {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+    }
 
-body{
-  margin:0;
-  font-family:system-ui,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  padding:14px;
-}
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
 
-.container{max-width:420px;margin:auto}
+    .container {
+      padding: 16px;
+      padding-bottom: 90px;
+      max-width: 480px;
+      margin: auto;
+    }
 
-h2{margin-bottom:10px}
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
 
-.card{
-  background:var(--card);
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:12px;
-}
+    h1 {
+      font-size: 18px;
+      margin: 0 0 8px;
+    }
 
-input,select,textarea,button{
-  width:100%;
-  padding:10px 12px;
-  border-radius:10px;
-  border:none;
-  margin-top:6px;
-}
+    .saldo {
+      font-size: 28px;
+      font-weight: bold;
+    }
 
-input,select,textarea{
-  background:var(--input);
-  color:var(--text);
-}
+    .row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: var(--muted);
+    }
 
-button{
-  background:var(--green);
-  font-weight:700;
-  cursor:pointer;
-}
+    button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      background: var(--accent);
+      color: #000;
+      font-weight: bold;
+    }
 
-.row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: transparent;
+      color: var(--text);
+      font-size: 16px;
+    }
 
-.small{font-size:12px;color:var(--muted)}
+    body.light input, body.light select {
+      background: #f1f5f9;
+      border: 1px solid #cbd5f5;
+    }
 
-.list-item{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-}
+    .tx {
+      border-bottom: 1px solid #334155;
+      padding: 10px 0;
+    }
 
-.amount.plus{color:var(--green)}
-.amount.minus{color:var(--red)}
+    .tx:last-child {
+      border-bottom: none;
+    }
 
-.actions{
-  display:flex;
-  gap:6px;
-  margin-top:6px;
-}
-.actions button{
-  padding:6px;
-  font-size:12px;
-}
-</style>
+    .minus { color: var(--danger); }
+    .plus { color: var(--success); }
+
+    .fab {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      font-size: 28px;
+    }
+
+    .hidden { display: none; }
+  </style>
 </head>
 
 <body>
-<div class="container">
+  <div class="container">
 
-<h2>💰 Keuangan Keluarga</h2>
+    <!-- Dashboard -->
+    <div class="card">
+      <h1>Saldo Keluarga</h1>
+      <div class="saldo" id="saldo">Rp 0</div>
+      <div class="row">
+        <div>Masuk: <span id="masuk">0</span></div>
+        <div>Keluar: <span id="keluar">0</span></div>
+      </div>
+    </div>
 
-<!-- INPUT -->
-<div class="card">
-  <input id="date" type="date">
+    <!-- Riwayat -->
+    <div class="card">
+      <h1>Riwayat</h1>
+      <div id="list"></div>
+    </div>
 
-  <select id="type">
-    <option value="income">Pemasukan</option>
-    <option value="expense">Pengeluaran</option>
-    <option value="adjust">Penyesuaian</option>
-  </select>
+    <!-- Form -->
+    <div class="card hidden" id="form">
+      <h1>Catatan Baru</h1>
 
-  <input id="category" placeholder="Kategori (Makan, Tagihan, dll)">
+      <input id="note" placeholder="Contoh: belanja sayur" />
+      <input id="amount" type="number" placeholder="Nominal" />
 
-  <input id="amount" type="number" placeholder="Nominal (Rp)">
+      <select id="type">
+        <option value="out">Keluar</option>
+        <option value="in">Masuk</option>
+      </select>
 
-  <textarea id="note" rows="2" placeholder="Catatan (opsional)"></textarea>
+      <select id="category"></select>
 
-  <button onclick="saveTx()">+ Simpan</button>
-</div>
+      <button onclick="saveTx()">Simpan</button>
+    </div>
 
-<!-- SUMMARY -->
-<div class="card">
-  <b>Saldo:</b>
-  <div style="font-size:20px;margin:6px 0" id="balance">Rp 0</div>
-  <div class="small">
-    + Masuk: <span id="sumIn">0</span><br>
-    - Keluar: <span id="sumOut">0</span>
+    <div class="card">
+      <button onclick="toggleTheme()">🌙 / ☀️ Ganti Tema</button>
+    </div>
+
   </div>
-</div>
 
-<!-- HISTORY -->
-<div class="card">
-  <b>Histori</b>
-  <div id="list"></div>
-</div>
-
-</div>
+  <button class="fab" onclick="toggleForm()">＋</button>
 
 <script>
-date.valueAsDate = new Date();
+const categories = {
+  makan: ["makan","jajan","kopi","resto","sayur"],
+  rumah: ["listrik","air","sewa","gas"],
+  anak: ["anak","sekolah","susu","popok"],
+  transport: ["bensin","ojek","tol","parkir"],
+  lain: []
+};
 
-let data = JSON.parse(localStorage.getItem("familyMoney")) || [];
-let editIndex = null;
+let data = JSON.parse(localStorage.getItem("family-money")) || [];
+
+function autoCategory(note){
+  note = note.toLowerCase();
+  for(let c in categories){
+    if(categories[c].some(k => note.includes(k))) return c;
+  }
+  return "lain";
+}
+
+function renderCategories(selected){
+  const sel = document.getElementById("category");
+  sel.innerHTML = "";
+  Object.keys(categories).forEach(c=>{
+    const o = document.createElement("option");
+    o.value = c;
+    o.textContent = c.toUpperCase();
+    if(c === selected) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+document.getElementById("note").addEventListener("input", e=>{
+  renderCategories(autoCategory(e.target.value));
+});
 
 function saveTx(){
-  if(amount.value <= 0){
-    alert("Nominal wajib diisi");
-    return;
-  }
+  const note = note.value.trim();
+  const amt = Number(amount.value);
+  if(!note || !amt) return alert("Lengkapi data");
 
-  const tx = {
-    date: date.value,
+  data.push({
+    note,
+    amt,
     type: type.value,
-    category: category.value || "-",
-    amount: +amount.value,
-    note: note.value
-  };
+    cat: category.value,
+    date: new Date().toISOString()
+  });
 
-  if(editIndex !== null){
-    data[editIndex] = tx;
-    editIndex = null;
-  } else {
-    data.unshift(tx);
-  }
-
-  localStorage.setItem("familyMoney", JSON.stringify(data));
-  resetForm();
+  localStorage.setItem("family-money", JSON.stringify(data));
+  toggleForm();
   render();
 }
 
-function resetForm(){
-  category.value = amount.value = note.value = "";
-  date.valueAsDate = new Date();
-}
-
-function editTx(i){
-  const t = data[i];
-  date.value = t.date;
-  type.value = t.type;
-  category.value = t.category;
-  amount.value = t.amount;
-  note.value = t.note;
-  editIndex = i;
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function delTx(i){
-  if(confirm("Hapus data?")){
-    data.splice(i,1);
-    localStorage.setItem("familyMoney", JSON.stringify(data));
-    render();
-  }
-}
-
 function render(){
-  list.innerHTML="";
-  let bal=0,income=0,expense=0;
+  const list = document.getElementById("list");
+  list.innerHTML = "";
 
-  data.forEach((t,i)=>{
-    if(t.type==="income"){bal+=t.amount;income+=t.amount;}
-    if(t.type==="expense"){bal-=t.amount;expense+=t.amount;}
-    if(t.type==="adjust"){bal+=t.amount;}
+  let saldo = 0, masuk = 0, keluar = 0;
 
-    list.innerHTML+=`
-      <div class="list-item">
-        <div>
-          <b>${t.category}</b>
-          <div class="small">${t.date}</div>
-        </div>
-        <div style="text-align:right">
-          <div class="amount ${t.type!=="expense"?"plus":"minus"}">
-            ${t.type==="expense"?"-":"+"}${t.amount.toLocaleString()}
-          </div>
-          <div class="actions">
-            <button onclick="editTx(${i})">✏️</button>
-            <button onclick="delTx(${i})">🗑</button>
-          </div>
-        </div>
-      </div>
-      <hr style="opacity:.1">
-    `;
+  data.slice().reverse().forEach(t=>{
+    saldo += t.type === "in" ? t.amt : -t.amt;
+    t.type === "in" ? masuk += t.amt : keluar += t.amt;
+
+    list.innerHTML += `
+      <div class="tx">
+        <strong>${t.cat.toUpperCase()}</strong> – ${t.note}<br>
+        <span class="${t.type==='in'?'plus':'minus'}">
+          ${t.type==='in'?'+':'-'} Rp ${t.amt.toLocaleString()}
+        </span>
+      </div>`;
   });
 
-  balance.textContent = "Rp " + bal.toLocaleString();
-  sumIn.textContent = income.toLocaleString();
-  sumOut.textContent = expense.toLocaleString();
+  saldoEl.textContent = "Rp " + saldo.toLocaleString();
+  masukEl.textContent = masuk.toLocaleString();
+  keluarEl.textContent = keluar.toLocaleString();
 }
 
+function toggleForm(){
+  form.classList.toggle("hidden");
+}
+
+function toggleTheme(){
+  document.body.classList.toggle("light");
+}
+
+renderCategories("lain");
 render();
-</script>
-
-<script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
-}
 </script>
 </body>
 </html>
