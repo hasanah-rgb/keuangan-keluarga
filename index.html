@@ -325,5 +325,10 @@ function switchTab(tab,btn){
   tabInsight.classList.toggle("hidden",tab!=="insight");
 }
 </script>
+  <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js");
+}
+</script>
 </body>
 </html>
