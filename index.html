@@ -117,6 +117,11 @@ button{
   border-top:3px solid #f59e0b;
 }
 .hidden{display:none}
+.empty{
+  text-align:center;
+  color:#9ca3af;
+  padding:40px 0;
+}
 </style>
 </head>
 
@@ -157,7 +162,9 @@ button{
 </div>
 
 <!-- TAB RIWAYAT -->
-<div id="tabHistory" class="hidden"></div>
+<div id="tabHistory" class="hidden">
+  <div id="historyList"></div>
+</div>
 
 <!-- TAB INSIGHT -->
 <div id="tabInsight" class="hidden">
@@ -176,33 +183,37 @@ button{
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, onSnapshot,
-  doc, deleteDoc, updateDoc
+  getFirestore, collection, addDoc,
+  onSnapshot, doc, deleteDoc, updateDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "15986435670",
-  authDomain: "keuangan-keluarga-86811.firebaseapp.com",
-  projectId: "keuangan-keluarga-86811",
+  apiKey: "ISI_API_KEY_MU",
+  authDomain: "keuangan-keluarga.firebaseapp.com",
+  projectId: "keuangan-keluarga"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const ref = collection(db, "keluarga");
+const ref = collection(db,"keluarga");
+
+window.addDoc = addDoc;
+window.updateDoc = updateDoc;
+window.deleteDoc = deleteDoc;
+window.doc = doc;
+window.ref = ref;
 
 let data = [];
-let type = "out";
-let editId = null;
-
-date.valueAsDate = new Date();
-
-/* REALTIME SYNC */
-onSnapshot(ref, snap => {
-  data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+onSnapshot(ref,snap=>{
+  data = snap.docs.map(d=>({id:d.id,...d.data()}));
   renderAll();
 });
+</script>
 
-/* AUTO CATEGORY */
+<script>
+let type="out", editId=null;
+date.valueAsDate=new Date();
+
 function autoCategory(t){
   t=t.toLowerCase();
   if(/makan|kopi|ayam|nasi/.test(t)) return "Makan";
@@ -214,18 +225,16 @@ function autoCategory(t){
 }
 note.oninput=()=>category.value=autoCategory(note.value);
 
-/* TYPE */
-window.setType = t => {
+function setType(t){
   type=t;
   btnIn.classList.remove("active");
   btnOut.classList.remove("active");
   (t==="in"?btnIn:btnOut).classList.add("active");
-};
+}
 
-/* SAVE */
-window.save = async () => {
+async function save(){
   if(!amount.value) return alert("Nominal wajib diisi");
-  const obj={
+  const payload={
     date:date.value,
     note:note.value,
     category:category.value,
@@ -234,15 +243,14 @@ window.save = async () => {
     ts:Date.now()
   };
   if(editId){
-    await updateDoc(doc(db,"keluarga",editId),obj);
+    await updateDoc(doc(ref,editId),payload);
     editId=null;
   }else{
-    await addDoc(ref,obj);
+    await addDoc(ref,payload);
   }
   reset();
-};
+}
 
-/* RESET */
 function reset(){
   note.value="";
   amount.value="";
@@ -251,11 +259,14 @@ function reset(){
   setType("out");
 }
 
-/* HISTORY */
 function renderHistory(){
-  tabHistory.innerHTML="";
+  historyList.innerHTML="";
+  if(!data.length){
+    historyList.innerHTML=`<div class="empty">Belum ada transaksi</div>`;
+    return;
+  }
   data.sort((a,b)=>b.ts-a.ts).forEach(t=>{
-    tabHistory.innerHTML+=`
+    historyList.innerHTML+=`
     <div class="card row">
       <div class="left">
         <div class="date">${t.date}</div>
@@ -273,8 +284,7 @@ function renderHistory(){
   });
 }
 
-/* EDIT */
-window.edit = id => {
+function edit(id){
   const t=data.find(x=>x.id===id);
   editId=id;
   date.value=t.date;
@@ -283,24 +293,21 @@ window.edit = id => {
   category.value=t.category;
   setType(t.type);
   switchTab('input',document.querySelector('.nav button'));
-};
+}
 
-/* DELETE */
-window.del = async id => {
-  if(confirm("Hapus data ini?")){
-    await deleteDoc(doc(db,"keluarga",id));
+async function del(id){
+  if(confirm("Hapus transaksi ini?")){
+    await deleteDoc(doc(ref,id));
   }
-};
+}
 
-/* INSIGHT */
 function renderInsight(){
   let inc=0,exp=0;
-  data.forEach(t=>{
-    t.type==="in"?inc+=t.amount:exp+=t.amount;
-  });
+  data.forEach(t=>t.type==="in"?inc+=t.amount:exp+=t.amount);
   insightBox.innerHTML=`
     <b>Pemasukan:</b> Rp ${inc.toLocaleString()}<br>
     <b>Pengeluaran:</b> Rp ${exp.toLocaleString()}<br>
+    <hr>
     <b>Saldo:</b> Rp ${(inc-exp).toLocaleString()}
   `;
 }
@@ -310,19 +317,12 @@ function renderAll(){
   renderInsight();
 }
 
-/* TAB */
-window.switchTab=(tab,btn)=>{
+function switchTab(tab,btn){
   document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
   tabInput.classList.toggle("hidden",tab!=="input");
   tabHistory.classList.toggle("hidden",tab!=="history");
   tabInsight.classList.toggle("hidden",tab!=="insight");
-};
-</script>
-
-<script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
 }
 </script>
 </body>
