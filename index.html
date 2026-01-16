@@ -1,255 +1,329 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Keuangan Keluarga</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uang Keluarga</title>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f172a">
-  <link rel="icon" href="icon192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon192.png">
+<meta name="theme-color" content="#f59e0b">
 
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --text: #e5e7eb;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --danger: #f87171;
-      --success: #4ade80;
-    }
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,sans-serif;
+  background:#fff7ed;
+  color:#1f2937;
+}
+header{
+  text-align:center;
+  padding:14px;
+  font-size:18px;
+  font-weight:700;
+  background:#fff;
+  border-bottom:1px solid #e5e7eb;
+}
+.container{
+  max-width:480px;
+  margin:auto;
+  padding:14px;
+  padding-bottom:90px;
+}
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:12px;
+  box-shadow:0 4px 14px rgba(0,0,0,.06);
+}
+label{font-size:12px;color:#6b7280}
+input,textarea,select{
+  width:100%;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #e5e7eb;
+  margin-bottom:10px;
+  font-size:14px;
+}
+.amount{font-size:18px;font-weight:700}
+button{
+  border:none;
+  border-radius:10px;
+  padding:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+.toggle{
+  display:flex;
+  gap:8px;
+  margin-bottom:10px;
+}
+.toggle button{
+  flex:1;
+  background:#fde68a;
+  color:#92400e;
+}
+.toggle button.active{
+  background:#f59e0b;
+  color:#fff;
+}
 
-    body.light {
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
-    }
+/* History */
+.row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.left .date{font-size:11px;color:#9ca3af}
+.left .note{font-size:16px;font-weight:600}
+.left .cat{
+  font-size:11px;
+  background:#fde68a;
+  padding:2px 8px;
+  border-radius:999px;
+  display:inline-block;
+}
+.right{text-align:right}
+.right .amt{font-size:16px;font-weight:700}
+.right .actions button{
+  padding:4px 6px;
+  font-size:12px;
+  margin-left:4px;
+  background:#e5e7eb;
+}
 
-    body {
-      margin: 0;
-      font-family: system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .container {
-      padding: 16px;
-      padding-bottom: 90px;
-      max-width: 480px;
-      margin: auto;
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    h1 {
-      font-size: 18px;
-      margin: 0 0 8px;
-    }
-
-    .saldo {
-      font-size: 28px;
-      font-weight: bold;
-    }
-
-    .row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: none;
-      font-size: 16px;
-      background: var(--accent);
-      color: #000;
-      font-weight: bold;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 10px;
-      border: 1px solid #334155;
-      background: transparent;
-      color: var(--text);
-      font-size: 16px;
-    }
-
-    body.light input, body.light select {
-      background: #f1f5f9;
-      border: 1px solid #cbd5f5;
-    }
-
-    .tx {
-      border-bottom: 1px solid #334155;
-      padding: 10px 0;
-    }
-
-    .tx:last-child {
-      border-bottom: none;
-    }
-
-    .minus { color: var(--danger); }
-    .plus { color: var(--success); }
-
-    .fab {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      font-size: 28px;
-    }
-
-    .hidden { display: none; }
-  </style>
+/* Nav */
+.nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  display:flex;
+  background:#fff;
+  border-top:2px solid #e5e7eb;
+}
+.nav button{
+  flex:1;
+  padding:12px;
+  background:none;
+  border:none;
+  font-weight:600;
+  color:#6b7280;
+}
+.nav button.active{
+  color:#f59e0b;
+  border-top:3px solid #f59e0b;
+}
+.hidden{display:none}
+</style>
 </head>
 
 <body>
-  <div class="container">
+<header>💰 Uang Keluarga</header>
 
-    <!-- Dashboard -->
-    <div class="card">
-      <h1>Saldo Keluarga</h1>
-      <div class="saldo" id="saldo">Rp 0</div>
-      <div class="row">
-        <div>Masuk: <span id="masuk">0</span></div>
-        <div>Keluar: <span id="keluar">0</span></div>
-      </div>
+<div class="container">
+
+<!-- TAB INPUT -->
+<div id="tabInput">
+  <div class="card">
+    <label>Tanggal</label>
+    <input type="date" id="date">
+
+    <div class="toggle">
+      <button id="btnOut" class="active" onclick="setType('out')">Pengeluaran</button>
+      <button id="btnIn" onclick="setType('in')">Pemasukan</button>
     </div>
 
-    <!-- Riwayat -->
-    <div class="card">
-      <h1>Riwayat</h1>
-      <div id="list"></div>
-    </div>
+    <label>Catatan</label>
+    <textarea id="note" rows="2"></textarea>
 
-    <!-- Form -->
-    <div class="card hidden" id="form">
-      <h1>Catatan Baru</h1>
+    <label>Nominal</label>
+    <input id="amount" type="number" class="amount">
 
-      <input id="note" placeholder="Contoh: belanja sayur" />
-      <input id="amount" type="number" placeholder="Nominal" />
+    <label>Kategori</label>
+    <select id="category">
+      <option>Makan</option>
+      <option>Transport</option>
+      <option>Rumah</option>
+      <option>Anak</option>
+      <option>Pemasukan</option>
+      <option>Lainnya</option>
+    </select>
 
-      <select id="type">
-        <option value="out">Keluar</option>
-        <option value="in">Masuk</option>
-      </select>
-
-      <select id="category"></select>
-
-      <button onclick="saveTx()">Simpan</button>
-    </div>
-
-    <div class="card">
-      <button onclick="toggleTheme()">🌙 / ☀️ Ganti Tema</button>
-    </div>
-
+    <button style="background:#f59e0b;color:#fff" onclick="save()">Simpan</button>
   </div>
+</div>
 
-  <button class="fab" onclick="toggleForm()">＋</button>
+<!-- TAB RIWAYAT -->
+<div id="tabHistory" class="hidden"></div>
 
-<script>
-const categories = {
-  makan: ["makan","jajan","kopi","resto","sayur"],
-  rumah: ["listrik","air","sewa","gas"],
-  anak: ["anak","sekolah","susu","popok"],
-  transport: ["bensin","ojek","tol","parkir"],
-  lain: []
+<!-- TAB INSIGHT -->
+<div id="tabInsight" class="hidden">
+  <div class="card" id="insightBox"></div>
+</div>
+
+</div>
+
+<div class="nav">
+  <button class="active" onclick="switchTab('input',this)">Input</button>
+  <button onclick="switchTab('history',this)">Riwayat</button>
+  <button onclick="switchTab('insight',this)">Insight</button>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, onSnapshot,
+  doc, deleteDoc, updateDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "15986435670",
+  authDomain: "keuangan-keluarga-86811.firebaseapp.com",
+  projectId: "keuangan-keluarga-86811",
 };
 
-let data = JSON.parse(localStorage.getItem("family-money")) || [];
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const ref = collection(db, "keluarga");
 
-function autoCategory(note){
-  note = note.toLowerCase();
-  for(let c in categories){
-    if(categories[c].some(k => note.includes(k))) return c;
-  }
-  return "lain";
-}
+let data = [];
+let type = "out";
+let editId = null;
 
-function renderCategories(selected){
-  const sel = document.getElementById("category");
-  sel.innerHTML = "";
-  Object.keys(categories).forEach(c=>{
-    const o = document.createElement("option");
-    o.value = c;
-    o.textContent = c.toUpperCase();
-    if(c === selected) o.selected = true;
-    sel.appendChild(o);
-  });
-}
+date.valueAsDate = new Date();
 
-document.getElementById("note").addEventListener("input", e=>{
-  renderCategories(autoCategory(e.target.value));
+/* REALTIME SYNC */
+onSnapshot(ref, snap => {
+  data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderAll();
 });
 
-function saveTx(){
-  const note = note.value.trim();
-  const amt = Number(amount.value);
-  if(!note || !amt) return alert("Lengkapi data");
+/* AUTO CATEGORY */
+function autoCategory(t){
+  t=t.toLowerCase();
+  if(/makan|kopi|ayam|nasi/.test(t)) return "Makan";
+  if(/bensin|ojek|parkir/.test(t)) return "Transport";
+  if(/listrik|air|internet/.test(t)) return "Rumah";
+  if(/anak|susu|popok/.test(t)) return "Anak";
+  if(/gaji|thr|jual/.test(t)) return "Pemasukan";
+  return "Lainnya";
+}
+note.oninput=()=>category.value=autoCategory(note.value);
 
-  data.push({
-    note,
-    amt,
-    type: type.value,
-    cat: category.value,
-    date: new Date().toISOString()
+/* TYPE */
+window.setType = t => {
+  type=t;
+  btnIn.classList.remove("active");
+  btnOut.classList.remove("active");
+  (t==="in"?btnIn:btnOut).classList.add("active");
+};
+
+/* SAVE */
+window.save = async () => {
+  if(!amount.value) return alert("Nominal wajib diisi");
+  const obj={
+    date:date.value,
+    note:note.value,
+    category:category.value,
+    type,
+    amount:+amount.value,
+    ts:Date.now()
+  };
+  if(editId){
+    await updateDoc(doc(db,"keluarga",editId),obj);
+    editId=null;
+  }else{
+    await addDoc(ref,obj);
+  }
+  reset();
+};
+
+/* RESET */
+function reset(){
+  note.value="";
+  amount.value="";
+  category.value="Lainnya";
+  date.valueAsDate=new Date();
+  setType("out");
+}
+
+/* HISTORY */
+function renderHistory(){
+  tabHistory.innerHTML="";
+  data.sort((a,b)=>b.ts-a.ts).forEach(t=>{
+    tabHistory.innerHTML+=`
+    <div class="card row">
+      <div class="left">
+        <div class="date">${t.date}</div>
+        <div class="note">${t.note||"-"}</div>
+        <div class="cat">${t.category}</div>
+      </div>
+      <div class="right">
+        <div class="amt">${t.type==="out"?"-":"+"}${t.amount.toLocaleString()}</div>
+        <div class="actions">
+          <button onclick="edit('${t.id}')">✏️</button>
+          <button onclick="del('${t.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
   });
-
-  localStorage.setItem("family-money", JSON.stringify(data));
-  toggleForm();
-  render();
 }
 
-function render(){
-  const list = document.getElementById("list");
-  list.innerHTML = "";
+/* EDIT */
+window.edit = id => {
+  const t=data.find(x=>x.id===id);
+  editId=id;
+  date.value=t.date;
+  note.value=t.note;
+  amount.value=t.amount;
+  category.value=t.category;
+  setType(t.type);
+  switchTab('input',document.querySelector('.nav button'));
+};
 
-  let saldo = 0, masuk = 0, keluar = 0;
+/* DELETE */
+window.del = async id => {
+  if(confirm("Hapus data ini?")){
+    await deleteDoc(doc(db,"keluarga",id));
+  }
+};
 
-  data.slice().reverse().forEach(t=>{
-    saldo += t.type === "in" ? t.amt : -t.amt;
-    t.type === "in" ? masuk += t.amt : keluar += t.amt;
-
-    list.innerHTML += `
-      <div class="tx">
-        <strong>${t.cat.toUpperCase()}</strong> – ${t.note}<br>
-        <span class="${t.type==='in'?'plus':'minus'}">
-          ${t.type==='in'?'+':'-'} Rp ${t.amt.toLocaleString()}
-        </span>
-      </div>`;
+/* INSIGHT */
+function renderInsight(){
+  let inc=0,exp=0;
+  data.forEach(t=>{
+    t.type==="in"?inc+=t.amount:exp+=t.amount;
   });
-
-  saldoEl.textContent = "Rp " + saldo.toLocaleString();
-  masukEl.textContent = masuk.toLocaleString();
-  keluarEl.textContent = keluar.toLocaleString();
+  insightBox.innerHTML=`
+    <b>Pemasukan:</b> Rp ${inc.toLocaleString()}<br>
+    <b>Pengeluaran:</b> Rp ${exp.toLocaleString()}<br>
+    <b>Saldo:</b> Rp ${(inc-exp).toLocaleString()}
+  `;
 }
 
-function toggleForm(){
-  form.classList.toggle("hidden");
+function renderAll(){
+  renderHistory();
+  renderInsight();
 }
 
-function toggleTheme(){
-  document.body.classList.toggle("light");
-}
+/* TAB */
+window.switchTab=(tab,btn)=>{
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  tabInput.classList.toggle("hidden",tab!=="input");
+  tabHistory.classList.toggle("hidden",tab!=="history");
+  tabInsight.classList.toggle("hidden",tab!=="insight");
+};
+</script>
 
-renderCategories("lain");
-render();
+<script>
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
 </script>
 </body>
 </html>
